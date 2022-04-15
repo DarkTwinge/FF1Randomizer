@@ -119,6 +119,14 @@ namespace FF1Lib
 			return rom;
 		}
 
+		public void LoadSharedDataTables() {
+			ItemsText = new ItemNames(this);
+			ArmorPermissions = new GearPermissions(0x3BFA0, (int)Item.Cloth, this);
+			WeaponPermissions = new GearPermissions(0x3BF50, (int)Item.WoodenNunchucks, this);
+			SpellPermissions = new SpellPermissions(this);
+			ClassData = new GameClasses(WeaponPermissions, ArmorPermissions, SpellPermissions, this);
+		}
+
 		public void Randomize(Blob seed, Flags flags, Preferences preferences)
 		{
 		    Flags flagsForRng = flags;
@@ -179,11 +187,7 @@ namespace FF1Lib
 			SeparateUnrunnables();
 			DrawCanoeUnderBridge();
 
-			ItemsText = new ItemNames(this);
-			ArmorPermissions = new GearPermissions(0x3BFA0, (int)Item.Cloth, this);
-			WeaponPermissions = new GearPermissions(0x3BF50, (int)Item.WoodenNunchucks, this);
-			SpellPermissions = new SpellPermissions(this);
-			ClassData = new GameClasses(WeaponPermissions, ArmorPermissions, SpellPermissions, this);
+			LoadSharedDataTables();
 
 			var talkroutines = new TalkRoutines();
 			var npcdata = new NPCdata(this);
