@@ -44,6 +44,7 @@ namespace FF1Lib
 
 	public enum SpellRoutine : byte
 	{
+	        None = 0,
 		Damage = 0x01,
 		DamageUndead = 0x02,
 		Heal = 0x07,
@@ -64,11 +65,12 @@ namespace FF1Lib
 	public enum SpellTargeting : byte
 	{
 		Any = 0xFF,
+		None = 0,
 		AllEnemies = 0x01,
 		OneEnemy = 0x02,
 		Self = 0x04,
 		AllCharacters = 0x08,
-		OneCharacters = 0x10
+		OneCharacter = 0x10
 	}
 
 	public enum SpellElement : byte
