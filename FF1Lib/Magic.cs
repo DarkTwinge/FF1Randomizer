@@ -90,6 +90,7 @@ namespace FF1Lib
 
 	public enum SpellStatus : byte
 	{
+	        None = 0,
 		Any = 0xFF,
 		Confuse = 0b10000000,
 		Mute = 0b01000000,
@@ -121,7 +122,12 @@ namespace FF1Lib
 	[JsonObject(MemberSerialization.OptIn)]
 	public class MagicSpell
 	{
+	    [JsonProperty]
 	    public byte Index;
+
+	    public bool ShouldSerializeIndex() {
+		return !isRegularSpell;
+	    }
 
 	    public Blob Data;
 
@@ -131,8 +137,16 @@ namespace FF1Lib
 	    [JsonProperty]
 	    public byte TextPointer;
 
+	    public bool ShouldSerializeTextPointer() {
+		return isRegularSpell;
+	    }
+
 	    [JsonProperty]
 	    public string Message;
+
+	    public bool ShouldSerializeMessage() {
+		return isRegularSpell;
+	    }
 
 	    [JsonProperty]
 	    public byte accuracy = 0;
@@ -199,8 +213,16 @@ namespace FF1Lib
 	    [JsonProperty]
 	    public byte gfx = 0;
 
+	    public bool ShouldSerializegfx() {
+		return isRegularSpell;
+	    }
+
 	    [JsonProperty]
 	    public byte palette = 0;
+
+	    public bool ShouldSerializepalette() {
+		return isRegularSpell;
+	    }
 
 	    void updateMagicIndex(byte level, byte slot, string type) {
 		this.Index = (byte)((level-1) * 8 + (slot-1));
@@ -219,6 +241,10 @@ namespace FF1Lib
 		}
 	    }
 
+	    public bool ShouldSerializeLevel() {
+		return isRegularSpell;
+	    }
+
 	    [JsonProperty]
 	    public byte Slot {
 		get {
@@ -227,6 +253,10 @@ namespace FF1Lib
 		set {
 		    this.updateMagicIndex(Level, value, MagicType);
 		}
+	    }
+
+	    public bool ShouldSerializeSlot() {
+		return isRegularSpell;
 	    }
 
 	    [JsonProperty]
@@ -242,15 +272,26 @@ namespace FF1Lib
 		}
 	    }
 
+	    public bool ShouldSerializeMagicType() {
+		return isRegularSpell;
+	    }
+
 	    [JsonProperty]
 	    [JsonConverter(typeof(StringEnumConverter))]
 	    public OOBSpellRoutine oobSpellRoutine = OOBSpellRoutine.None;
+
+	    public bool ShouldSerializeoobSpellRoutine() {
+		return isRegularSpell;
+	    }
 
 	    List<Classes> _permissions = new();
 
 	    [JsonProperty]
 	    public string permissions {
 		get {
+		    if (_permissions == null) {
+			return "";
+		    }
 		    string ret = "";
 		    foreach (var c in _permissions) {
 			if (ret != "") {
@@ -261,6 +302,12 @@ namespace FF1Lib
 		    return ret;
 		}
 	    }
+
+	    public bool ShouldSerializepermissions() {
+		return isRegularSpell;
+	    }
+
+	    bool isRegularSpell;
 
 	    public MagicSpell(byte _Index,
 			      Blob _Data,
@@ -275,6 +322,19 @@ namespace FF1Lib
 		TextPointer = _TextPointer;
 		Message = _Message;
 		_permissions = __permissions;
+		isRegularSpell = true;
+		this.decompressData(Data);
+	    }
+
+	    public MagicSpell(byte _Index,
+			      Blob _Data,
+			      string _Name,
+			      bool _isRegularSpell)
+	    {
+		Index = _Index;
+		Data = _Data;
+		Name = _Name;
+		isRegularSpell = _isRegularSpell;
 		this.decompressData(Data);
 	    }
 
@@ -293,8 +353,10 @@ namespace FF1Lib
 
 	    public void writeData(FF1Rom rom) {
 		compressData();
-		rom.Put(FF1Rom.MagicOffset + FF1Rom.MagicSize * Index, Data);
-		rom.ItemsText[176 + Index] = Name;
+		if (isRegularSpell) {
+		    rom.Put(FF1Rom.MagicOffset + FF1Rom.MagicSize * Index, Data);
+		    rom.ItemsText[176 + Index] = Name;
+		}
 	    }
 
 	    public void decompressData(byte[] data)
